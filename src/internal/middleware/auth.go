@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"chacalc/internal/config"
+	"chacalc/src/internal/config"
 )
 
 type contextKey string

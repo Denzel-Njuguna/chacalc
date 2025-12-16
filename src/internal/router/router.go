@@ -6,10 +6,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"chacalc/internal/auth"
-	"chacalc/internal/config"
-	"chacalc/internal/health"
-	authMiddleware "chacalc/internal/middleware"
+	"chacalc/src/internal/auth"
+	"chacalc/src/internal/config"
+	"chacalc/src/internal/health"
+	authMiddleware "chacalc/src/internal/middleware"
 )
 
 func New(cfg *config.Config) http.Handler {
