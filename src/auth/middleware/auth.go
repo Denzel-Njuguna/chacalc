@@ -1,11 +1,10 @@
 package middleware
 
 import (
+	"chacalc/src/auth/config"
 	"context"
 	"encoding/json"
 	"net/http"
-
-	"chacalc/internal/config"
 )
 
 type contextKey string
@@ -27,7 +26,7 @@ func Auth(cfg *config.Config) func(http.Handler) http.Handler {
 				nil,
 			)
 			if err != nil {
-				http.Error(w, "internal error", http.StatusInternalServerError)
+				http.Error(w, "auth error", http.StatusInternalServerError)
 				return
 			}
 

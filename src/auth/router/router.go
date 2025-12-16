@@ -1,15 +1,14 @@
 package router
 
 import (
+	"chacalc/src/auth/auth"
+	"chacalc/src/auth/config"
+	"chacalc/src/auth/health"
+	authMiddleware "chacalc/src/auth/middleware"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-
-	"chacalc/internal/auth"
-	"chacalc/internal/config"
-	"chacalc/internal/health"
-	authMiddleware "chacalc/internal/middleware"
 )
 
 func New(cfg *config.Config) http.Handler {

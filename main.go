@@ -1,11 +1,10 @@
 package main
 
 import (
+	"chacalc/src/auth/config"
+	"chacalc/src/auth/router"
 	"log"
 	"net/http"
-
-	"chacalc/internal/config"
-	"chacalc/internal/router"
 )
 
 func main() {

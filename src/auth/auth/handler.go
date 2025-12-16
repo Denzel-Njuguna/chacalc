@@ -2,7 +2,7 @@ package auth
 
 import (
 	"bytes"
-	"chacalc/internal/config"
+	"chacalc/src/auth/config"
 	"encoding/json"
 	"net/http"
 )
