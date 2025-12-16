@@ -25,10 +25,7 @@ type Updateport struct {
 func (update *Updateport) Checker() string {
 	conn := databaseconn.Connection()
 	ctx, ctxerr := context.WithTimeout(context.Background(), 60*time.Second)
-	if ctxerr != nil {
-		src.Logger.Fatalf("there was an error creating context for updating portfolio %v", ctxerr)
-		return ""
-	}
+	defer ctxerr()
 	var stockamt apd.Decimal
 	qerr := conn.QueryRow(ctx, "select stockamt from public.holdings where userid=$1,chamaid=$2,ticker=$3", update.Userid, update.Chamaid, update.Ticker).Scan(&stockamt)
 	if qerr != nil {
@@ -115,5 +112,3 @@ func updatechama(update *Updateport, conn *pgxpool.Pool, ctx context.Context) st
 	}
 	return "success"
 }
-
-// TODO: implement the subtraction logic

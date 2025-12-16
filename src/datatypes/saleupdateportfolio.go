@@ -25,10 +25,8 @@ type Soldstock struct {
 func (sell *Soldstock) Calculatesale() string {
 	conn := databaseconn.Connection()
 	defer conn.Close()
-	ctx, err := context.WithTimeout(context.Background(), 60*time.Second)
-	if err != nil {
-		src.Logger.Fatalf("there was an issue creating a context for calculate database query %v", err)
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
 	var currentstockamt apd.Decimal
 	var previousstockamt apd.Decimal
 	// here we are getting the particular stock from since we are using ticker symbol
@@ -61,7 +59,7 @@ func (sell *Soldstock) Calculatesale() string {
 	if cmdtag.RowsAffected() == 0 {
 		src.Logger.Println("no rows were affected")
 	}
-	src.Logger.Fatalf(Subtractchama(sell, conn, ctx))
+	src.Logger.Fatalln(Subtractchama(sell, conn, ctx))
 	return "successfully updated the users account"
 }
 func Subtractchama(sale *Soldstock, conn *pgxpool.Pool, ctx context.Context) string {
