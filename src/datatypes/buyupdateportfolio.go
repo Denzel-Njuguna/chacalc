@@ -4,6 +4,8 @@ import (
 	"chacalc/src"
 	"chacalc/src/databaseconn"
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/cockroachdb/apd"
@@ -12,7 +14,7 @@ import (
 )
 
 // update portfolio increase portfolio
-type updateport struct {
+type Updateport struct {
 	Userid   string      `json:"userid"`
 	Chamaid  string      `json:"chamaid"`
 	Stockamt apd.Decimal `json:"stockamt"`
@@ -20,11 +22,11 @@ type updateport struct {
 }
 
 // this checks if the stock is there and if not it creates it for the user
-func (update *updateport) Checker() string {
+func (update *Updateport) Checker() string {
 	conn := databaseconn.Connection()
 	ctx, ctxerr := context.WithTimeout(context.Background(), 60*time.Second)
 	if ctxerr != nil {
-		src.Logger.Fatalf("there was an error creating context for updating portfolio", ctxerr)
+		src.Logger.Fatalf("there was an error creating context for updating portfolio %v", ctxerr)
 		return ""
 	}
 	var stockamt apd.Decimal
@@ -52,7 +54,7 @@ func (update *updateport) Checker() string {
 }
 
 // this is to update individual holding by adding to the existing ones
-func Updateholdings(update *updateport, conn *pgxpool.Pool, ctx context.Context, stockamt apd.Decimal) string {
+func Updateholdings(update *Updateport, conn *pgxpool.Pool, ctx context.Context, stockamt apd.Decimal) string {
 
 	var newstockamt apd.Decimal
 	apd.BaseContext.Add(&newstockamt, &stockamt, &update.Stockamt)
@@ -66,5 +68,52 @@ func Updateholdings(update *updateport, conn *pgxpool.Pool, ctx context.Context,
 		src.Logger.Fatalln("update failed in updateportfolio.updateholdings")
 		return ""
 	}
+	updatechama(update, conn, ctx)
 	return "success"
 }
+
+// this is to add the persons stock to the chama's stock portfolio
+func updatechama(update *Updateport, conn *pgxpool.Pool, ctx context.Context) string {
+	/*
+		take the chama id and go to the chama table
+		retrieve the holdings column update the particular stock
+	*/
+	var chamaholdings []byte
+
+	qerr := conn.QueryRow(ctx, "select chamaholdings from public.chamas where chamaid = $1", update.Chamaid).Scan(&chamaholdings)
+	if qerr != nil {
+		src.Logger.Fatalf("There was an issue querying the database %v", qerr)
+		return ""
+	}
+	var summary Chamaholdings
+	if len(chamaholdings) > 0 {
+		json.Unmarshal(chamaholdings, &summary)
+	} else {
+		summary = Chamaholdings{
+			Stocks: make(map[string]stocksummary),
+		}
+	}
+
+	stock := update.Ticker
+	current := summary.Stocks[stock]
+	fmt.Printf("before:%v", current)
+	apd.BaseContext.Add(&current.Stockamount, &current.Stockamount, &update.Stockamt)
+	fmt.Println("after", current)
+	summary.Stocks[stock] = current
+	updatedjson, _ := json.Marshal(summary)
+
+	cmdtag, uerr := conn.Exec(ctx, "update public.chamas set chamaholdings = $2 where chamaid = $1", update.Chamaid, updatedjson)
+
+	if uerr != nil {
+		src.Logger.Fatalf("there was an issue updating the chamaholdings %v", uerr)
+		return ""
+	}
+
+	if cmdtag.RowsAffected() == 0 {
+		src.Logger.Println("No rows were affected")
+		return ""
+	}
+	return "success"
+}
+
+// TODO: implement the subtraction logic
