@@ -2,6 +2,8 @@ package auth
 
 import (
 	"bytes"
+	"chacalc/src"
+	"chacalc/src/datatypes"
 	"chacalc/src/internal/config"
 	"encoding/json"
 	"net/http"
@@ -361,4 +363,16 @@ func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
 	// 7. Success
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
+}
+func (handle *Handler) Stocksale(write http.ResponseWriter, req *http.Request) {
+	var data datatypes.Soldstock
+
+	json.NewDecoder(req.Body).Decode(&data)
+	val := data.Calculatesale()
+	if val == "" {
+		src.Logger.Fatalf("there was an issue in Calculate sale")
+	}
+	write.Header().Set("Content-Type", "application/json")
+	write.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(write).Encode("successfully sold the stock")
 }

@@ -61,7 +61,7 @@ func (sell *Soldstock) Calculatesale() string {
 	if cmdtag.RowsAffected() == 0 {
 		src.Logger.Println("no rows were affected")
 	}
-	Subtractchama(sell, conn, ctx)
+	src.Logger.Fatalf(Subtractchama(sell, conn, ctx))
 	return "successfully updated the users account"
 }
 func Subtractchama(sale *Soldstock, conn *pgxpool.Pool, ctx context.Context) string {
