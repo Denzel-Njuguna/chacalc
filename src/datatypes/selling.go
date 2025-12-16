@@ -8,9 +8,9 @@ import (
 
 	"github.com/cockroachdb/apd"
 	"github.com/jackc/pgx/v5"
-	"golang.org/x/tools/go/analysis/passes/defers"
 )
 
+// this is for an individual to sell their stock
 type Soldstock struct {
 	Userid      string      `json:"userid"`
 	Stock       string      `json:"stockname"`
@@ -59,5 +59,15 @@ func (sell *Soldstock) Calculatesale() string {
 	currentstockamt = newstockamt
 	previouscashamt = currentcashamt
 	currentcashamt = newcashamt
+
+	cmdtag, upderr := conn.Exec(ctx, "update public.currentholds set currentcashamt=$1,previouscashamt=$2,currentstockamt=$3,previoustockamt= $4", currentcashamt, previouscashamt, currentstockamt, previousstockamt)
+	if upderr != nil {
+		src.Logger.Fatalf(updaterowerr, upderr)
+		return ""
+	}
+	if cmdtag.RowsAffected() == 0 {
+		src.Logger.Println("no rows were affected")
+	}
+	return "successfully updated the users account"
 
 }
