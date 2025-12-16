@@ -27,6 +27,7 @@ func (update *updateport) Checker() string {
 		src.Logger.Fatal("there was an error contacting db in update portfolio")
 	}
 	if row.CommandTag().RowsAffected() == 0 {
-
+		src.Logger.Println("there was no rows found")
 	}
+	cmdtag, err := conn.Exec(ctx, "insert into public.holdings(userid,chamaid,ticker,quantity,currentstockamt,previousstockamt)values ($1,$2,$3,$4,$5,$6)", update.Userid, update.Chamaid, update.Ticker, update.Stockamt, update.Stockamt, 0.0)
 }
