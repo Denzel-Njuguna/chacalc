@@ -1,0 +1,1 @@
+also implement to allow a group to sell its stock together(it will divide the sold stock equally among the members)

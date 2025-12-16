@@ -1,7 +1,12 @@
 package datatypes
 
+import (
+	"github.com/cockroachdb/apd"
+)
+
 type Indcontr struct {
-	Name        string `json:"name"`
-	Phonenumber string `json:"phone"`
-	Amount      string `json:"amount`
+	Userid      string      `json:"userid"`
+	Stockamount string      `json:"stockamount"`
+	Stockname   string      `json:"stockname"`
+	Buyingprice apd.Decimal `json:"buyprice"`
 }
