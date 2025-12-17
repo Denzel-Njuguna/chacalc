@@ -29,6 +29,15 @@ func New(cfg *config.Config) http.Handler {
 		r.With(authMiddleware.Auth(cfg)).Post("/reset-password", authHandler.ResetPassword)
 		r.With(authMiddleware.Auth(cfg)).Post("/update-password", authHandler.UpdatePassword)
 		r.With(authMiddleware.Auth(cfg)).Get("/me", authHandler.Me)
+		r.Post("/onboarding", authHandler.Onboarding)
+
+	})
+
+	r.Route("/chama", func(r chi.Router) {
+		r.Post("/create", authHandler.CreateChama)
+		r.Post("/join", authHandler.JoinChama)
+		r.Post("/add-member", authHandler.AddMemberToChama)
+
 	})
 
 	return r

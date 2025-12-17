@@ -2,13 +2,7 @@
 
 Request
 
-curl -X POST http://localhost:8080/auth/signup \
--H "Content-Type: application/json" \
--d '{
-"email":"test@example.com",
-"password":"Password123"
-}'
-
+curl -X POST http://localhost:8080/auth/signup   -H "Content-Type: application/json"   -d '{"email":"test@gmail.com","password":"password123"}'
 
 Response (success)
 
@@ -20,12 +14,7 @@ Response (success)
 
 Request
 
-curl -X POST http://localhost:8080/auth/login \
--H "Content-Type: application/json" \
--d '{
-"email":"test@example.com",
-"password":"Password123"
-}'
+curl -X POST http://localhost:8080/auth/login   -H "Content-Type: application/json"   -d '{"email":"test@gmail.com","password":"password123"}'
 
 
 Response (success)
@@ -45,8 +34,8 @@ Copy access_token for protected routes.
 
 Request
 
-curl -X POST http://localhost:8080/auth/logout \
--H "Authorization: Bearer <ACCESS_TOKEN>"
+curl -X POST http://localhost:8080/auth/logout   -H "Authorization: Bearer <access token>"
+
 
 
 Response (success)
@@ -60,12 +49,7 @@ Use the access token. This logs the user out and invalidates the session.
 
 Request
 
-curl -X POST http://localhost:8080/auth/forgot-password \
--H "Content-Type: application/json" \
--d '{
-"email":"test@example.com"
-}'
-
+curl -X POST http://localhost:8080/auth/forgot-password \ -H "Content-Type: application/json" \ -d '{"email":"test@example.com"}'
 
 Response (success)
 
@@ -135,3 +119,15 @@ Response (success)
 "app_metadata": { ... },
 "user_metadata": { ... }
 }
+
+8 Onboard User
+
+request
+
+curl -X POST http://localhost:8080/auth/onboarding \
+-H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+-H "Content-Type: application/json" \
+-d '{
+"username": "Test",
+"phone": "0123456789"
+}'

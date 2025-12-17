@@ -37,3 +37,12 @@ type ResetPasswordRequest struct {
 type UpdatePasswordRequest struct {
 	NewPassword string `json:"new_password"`
 }
+
+type OnboardingRequest struct {
+	Username string `json:"username"`
+	Phone    string `json:"phone"`
+}
+
+type OnboardingResponse struct {
+	Message string `json:"message"`
+}

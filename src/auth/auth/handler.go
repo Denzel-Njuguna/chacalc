@@ -362,3 +362,69 @@ func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 }
+
+func (h *Handler) Onboarding(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		http.Error(w, "missing authorization header", http.StatusUnauthorized)
+		return
+	}
+
+	var req OnboardingRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Username == "" || req.Phone == "" {
+		http.Error(w, "username and phone are required", http.StatusBadRequest)
+		return
+	}
+
+	body, _ := json.Marshal(map[string]any{
+		"username":  req.Username,
+		"phone":     req.Phone,
+		"onboarded": true,
+	})
+
+	supabaseReq, err := http.NewRequest(
+		http.MethodPatch,
+		h.cfg.SupabaseURL+"/rest/v1/profiles",
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		http.Error(w, "failed to create request", http.StatusInternalServerError)
+		return
+	}
+
+	supabaseReq.Header.Set("Content-Type", "application/json")
+	supabaseReq.Header.Set("apikey", h.cfg.SupabaseAnonKey)
+	supabaseReq.Header.Set("Authorization", token)
+	supabaseReq.Header.Set("Prefer", "return=minimal")
+
+	q := supabaseReq.URL.Query()
+	q.Add("user_id", "eq."+extractUserIDFromJWT(token))
+	supabaseReq.URL.RawQuery = q.Encode()
+
+	client := &http.Client{}
+	resp, err := client.Do(supabaseReq)
+	if err != nil {
+		http.Error(w, "failed to update profile", http.StatusBadGateway)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		var errBody map[string]any
+		json.NewDecoder(resp.Body).Decode(&errBody)
+
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(errBody)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(OnboardingResponse{
+		Message: "Onboarding completed successfully",
+	})
+}

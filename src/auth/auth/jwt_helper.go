@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"strings"
 
@@ -29,4 +31,25 @@ func GetUserEmailFromToken(bearerToken string) (string, error) {
 	}
 
 	return "", errors.New("email not found in token")
+}
+
+func extractUserIDFromJWT(authHeader string) string {
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 {
+		return ""
+	}
+
+	tokenStr := parts[1]
+	tokenParts := strings.Split(tokenStr, ".")
+	if len(tokenParts) < 2 {
+		return ""
+	}
+
+	payload, _ := base64.RawStdEncoding.DecodeString(tokenParts[1])
+
+	var claims map[string]any
+	json.Unmarshal(payload, &claims)
+
+	sub, _ := claims["sub"].(string)
+	return sub
 }
